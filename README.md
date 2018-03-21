@@ -13,10 +13,11 @@
 
 
 三、配置增加：
-/module/config/filter.php 最后两行增加了dingtalk模块的参数过滤
-/module/config/my.php 最后增加了钉钉参数配置, 请将配置里的钉钉参数修改为你的钉钉参数
+/config/filter.php 最后两行增加了dingtalk模块的参数过滤
+/config/my.php 最后增加了钉钉参数配置, 请将配置里的钉钉参数修改为你的钉钉参数
 
 
 四、文件更改：
 /module/user/view/login.html.php 增加了判断开启钉钉登录按钮的1行代码
 /module/user/lang/ 下的语言包文件添加了钉钉按钮文字显示内容 $lang->user->dingBtn
+/module/common/model.php 里的isOpenMethod方法添加钉钉登录开放
