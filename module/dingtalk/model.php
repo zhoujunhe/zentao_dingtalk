@@ -1,6 +1,4 @@
-/*
- * created by wyne, QQ: 366659539
- */
+
 <?php
 class dingtalkModel extends model
 {
@@ -207,11 +205,55 @@ class dingtalkModel extends model
      * 检查钉钉用户是否注册过,若注册过则直接查询返回
      * */
     public function checkDingtalkUser($dt_openid,$dt_persistent_code){
-        $user = $this->dao->select('*')->from(TABLE_USER)
+        $record = $this->dao->select('*')->from(TABLE_USER)
             ->where('dt_openid')->eq($dt_openid)
             ->andWhere('dt_persistent_code')->eq($dt_persistent_code)
+            ->andWhere('deleted')->eq(0)
             ->limit('0,1')
             ->fetch();
+        $user = false;
+        if($record)
+        {
+            $passwordLength = strlen($password);
+            if($passwordLength < 32)
+            {
+                $user = $record;
+            }
+            elseif($passwordLength == 32)
+            {
+                $hash = $this->session->rand ? md5($record->password . $this->session->rand) : $record->password;
+                $user = $password == $hash ? $record : '';
+            }
+            elseif($passwordLength == 40)
+            {
+                $hash = sha1($record->account . $record->password . $record->last);
+                $user = $password == $hash ? $record : '';
+            }
+            if(!$user and md5($password) == $record->password) $user = $record;
+        }
+
+        if($user)
+        {
+            $ip   = $this->server->remote_addr;
+            $last = $this->server->request_time;
+
+            $user->lastTime       = $user->last;
+            $user->last           = date(DT_DATETIME1, $last);
+            $user->admin          = strpos($this->app->company->admins, ",{$user->account},") !== false;
+            $user->modifyPassword = ($user->visits == 0 and !empty($this->config->safe->modifyPasswordFirstLogin));
+            if($user->modifyPassword) $user->modifyPasswordReason = 'modifyPasswordFirstLogin';
+            if(!$user->modifyPassword and !empty($this->config->safe->changeWeak))
+            {
+                $user->modifyPassword = $this->loadModel('admin')->checkWeak($user);
+                if($user->modifyPassword) $user->modifyPasswordReason = 'weak';
+            }
+
+            $this->dao->update(TABLE_USER)->set('visits = visits + 1')->set('ip')->eq($ip)->set('last')->eq($last)->where('account')->eq($account)->exec();
+
+            /* Create cycle todo in login. */
+            $todoList = $this->dao->select('*')->from(TABLE_TODO)->where('cycle')->eq(1)->andWhere('account')->eq($user->account)->fetchAll('id');
+            $this->loadModel('todo')->createByCycle($todoList);
+        }
         return $user;
     }
 }

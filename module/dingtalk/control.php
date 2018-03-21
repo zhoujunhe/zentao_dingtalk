@@ -1,6 +1,3 @@
-/*
- * created by wyne, QQ: 366659539
- */
 <?php
 
 class dingtalk extends control
@@ -38,12 +35,12 @@ class dingtalk extends control
                     'dt_openid'=>$usercode['openid'],
                     'dt_unionid'=>$usercode['unionid'],
                     'dt_persistent_code'=>$usercode['persistent_code'],
-                    'dt_dingId'=>$userinfo['dingId'],
+                    'dt_dingId'=>$userinfo['user_info']['dingId'],
                     'dt_nick'=>$userinfo['user_info']['nick']
                 ];
 
                 /* 用户注册 */
-                $this->regDingtalkUser($data);
+                $this->dingtalk->regDingtalkUser($data);
                 $userid = $this->dao->lastInsertID();
 
                 /* 重新获取钉钉用户信息 */

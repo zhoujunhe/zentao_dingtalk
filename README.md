@@ -20,6 +20,3 @@
 四、文件更改：
 /module/user/view/login.html.php 增加了判断开启钉钉登录按钮的1行代码
 /module/user/lang/ 下的语言包文件添加了钉钉按钮文字显示内容 $lang->user->dingBtn
-
-
-create by wyne , QQ: 366659539
