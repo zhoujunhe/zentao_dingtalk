@@ -15,4 +15,4 @@ $config->default->lang   = 'zh-cn';
 $config->ding->ddturnon = true;/* 是否开启钉钉登录 */
 $config->ding->appid = '';/* 钉钉管理APPID */
 $config->ding->appsecret = '';/* 钉钉密钥 */
-$config->ding->redirect = 'http://xxxxxxx/www/dingtalk-login.html';/* 回调地址,与钉钉管理后台保持一致 */
+$config->ding->redirect = 'http://xxxxxxx.com';/* 回调地址域名,与钉钉管理后台保持一致 */
