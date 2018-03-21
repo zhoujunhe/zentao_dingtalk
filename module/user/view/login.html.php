@@ -46,7 +46,7 @@ if(empty($config->notMd5Pwd))js::import($jsRoot . 'md5.js');
             <td>
             <?php 
             echo html::submitButton($lang->login);
-            /* 钉钉登录按钮 */ if($config->ding->ddturnon) echo html::linkButton($lang->user->dingBtn,"https://oapi.dingtalk.com/connect/qrconnect?appid=".$config->ding->appid."&response_type=code&scope=snsapi_login&state=".$this->loadModel('dingtalk')->updateSessionDing()."&redirect_uri=".urlencode($config->ding->redirect),'window','','btn btn-danger');
+            /* 钉钉登录按钮 */ if($config->ding->ddturnon) echo html::linkButton($lang->user->dingBtn,"https://oapi.dingtalk.com/connect/qrconnect?appid=".$config->ding->appid."&response_type=code&scope=snsapi_login&state=".$this->loadModel('dingtalk')->updateSessionDing()."&redirect_uri=".urlencode($config->ding->redirect.'/www/dingtalk-login.html'),'window','','btn btn-danger');
             if($app->company->guest) echo '&nbsp; ' . html::linkButton($lang->user->asGuest, $this->createLink($config->default->module));
             echo '&nbsp; ' . html::hidden('referer', $referer);
             echo '&nbsp; ' . html::a(inlink('reset'), $lang->user->resetPassword);
