@@ -173,4 +173,6 @@ $lang->user->noticeResetFile = "<h5>普通用户请联系管理员重置密码</
     <li>文件内容为空。</li>
     <li>如果之前文件存在，删除之后重新创建。</li>
     </ol>";
+$lang->user->dingid = "钉钉ID";
 $lang->user->dingBtn = "钉钉登录";
+$lang->user->dingBindBtn = "绑定钉钉";

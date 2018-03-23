@@ -173,4 +173,6 @@ $lang->user->noticeResetFile = "<h5>Contact the Administrator to reset your pass
     <li>Keep the file empty.</li>
     <li>If the file exists, remove it and create it again.</li>
     </ol>";
+$lang->user->dingid = 'DingTalk ID';
 $lang->user->dingBtn = 'DingTalk Login';
+$lang->user->dingBtn = 'Bind DingTalk';

@@ -173,4 +173,6 @@ $lang->user->noticeResetFile = "<h5>普通用戶請聯繫管理員重置密碼</
     <li>檔案內容為空。</li>
     <li>如果之前檔案存在，刪除之後重新創建。</li>
     </ol>";
+$lang->user->dingid = '釘釘ID';
 $lang->user->dingBtn = '釘釘登錄';
+$lang->user->dingBtn = '綁定釘釘';

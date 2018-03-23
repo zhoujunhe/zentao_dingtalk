@@ -177,6 +177,24 @@ class dingtalkModel extends model
         die("<div style='margin-bottom:8px;'>登录失败! <strong style='color:#ed980f'>".$msg."</strong> <br/>300 秒后页面自动跳转</div>");
     }
 
+    /* 已注册用户绑定钉钉账号 */
+    public function bindDingtalkUser($account,$data){
+        $duser = new stdclass();
+        $duser->dt_openid = $data['dt_openid'];
+        $duser->dt_persistent_code = $data['dt_persistent_code'];
+        $duser->dt_unionid = $data['dt_unionid'];
+        $duser->dt_dingid = $data['dt_dingId'];
+        $duser->dt_nick = $data['dt_nick'];
+        $duser->realname = $data['dt_nick'];
+        $duser->nickname = $data['dt_nick'];
+        $rows = $this->dao->update(TABLE_USER)
+            ->data($duser)
+            ->where('account')->eq($account)
+            ->limit('1')
+            ->exec();
+        return $rows;
+    }
+
     /*
      * 插入钉钉用户数据和用户组关系
      * */
