@@ -26,8 +26,22 @@
 
 #### 三、配置增加：
 * /config/filter.php 最后两行增加了dingtalk模块的参数过滤
+```
+/* 钉钉登录GET参数 */
+$filter->dingtalk->login->get['code'] = 'reg::any';
+$filter->dingtalk->login->get['state'] = 'reg::any';
+```
 * /config/my.php 最后增加了钉钉参数配置, 请将配置里的钉钉参数修改为你的钉钉参数
-
+```
+/* 钉钉登录配置 */
+$config->ding->ddturnon = true;/* 是否开启钉钉登录 */
+$config->ding->logintype = 1;/* 钉钉登录方式,0仅允许绑定登录,1允许自动注册登录(建议新平台使用此方法,方便人员自行添加) */
+$config->ding->appid = '';/* 钉钉扫码登录appId */
+$config->ding->appsecret = '';/* 钉钉扫码登录appSecret */
+$config->ding->redirect = '';/* 回调地址域名,与钉钉管理后台保持一致 */
+$config->ding->inter_appkey = ' ';/* 钉钉H5微应用appkey */
+$config->ding->inter_appsecret = ' ';/* 钉钉H5微应用AppSecret */
+```
 
 #### 四、文件更改：
 复制文件之前推荐先备份目录下所有文件，如果复制过去不能使用，安以下方法更更源代码
