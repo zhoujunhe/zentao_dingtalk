@@ -13,9 +13,7 @@ $config->db->password    = '123456';
 $config->db->prefix      = 'zt_';
 $config->webRoot         = getWebRoot();
 $config->default->lang   = 'zh-cn';
-$filter->oidc=new stdclass();
-$filter->oidc->index=new stdclass();
-$filter->oidc->index->paramValue['scope']='reg::any';
+
 
 
 /* 钉钉登录配置 */
