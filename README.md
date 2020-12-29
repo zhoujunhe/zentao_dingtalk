@@ -39,8 +39,8 @@ $config->ding->logintype = 1;/* 钉钉登录方式,0仅允许绑定登录,1允�
 $config->ding->appid = '';/* 钉钉扫码登录appId */
 $config->ding->appsecret = '';/* 钉钉扫码登录appSecret */
 $config->ding->redirect = '';/* 回调地址域名,与钉钉管理后台保持一致 */
-$config->ding->inter_appkey = ' ';/* 钉钉H5微应用appkey */
-$config->ding->inter_appsecret = ' ';/* 钉钉H5微应用AppSecret */
+$config->ding->inter_appkey = '';/* 钉钉H5微应用appkey */
+$config->ding->inter_appsecret = '';/* 钉钉H5微应用AppSecret */
 ```
 
 #### 四、文件更改：
