@@ -32,15 +32,15 @@
 #### 四、文件更改：
 复制文件之前推荐先备份目录下所有文件，如果复制过去不能使用，安以下方法更更源代码
 
-* /module/user/view/login.html.php 增加了判断开启钉钉登录按钮的1行代码,在代码echo html::submitButton($lang->login, '', 'btn btn-primary');以下增加如下一行代码
+* /module/user/view/login.html.php 增加了判断开启钉钉登录按钮的1行代码,在代码'''echo html::submitButton($lang->login, '', 'btn btn-primary');'''以下增加如下一行代码
 '''
 /* 钉钉登录按钮 */ if($config->ding->ddturnon) echo html::linkButton($lang->user->dingBtn,"https://oapi.dingtalk.com/connect/qrconnect?appid=".$config->ding->appid."&response_type=code&scope=snsapi_login&state=".$this->loadModel('dingtalk')->updateSessionDing()."&redirect_uri=".urlencode($config->ding->redirect.$this->createLink('dingtalk','login')),'window','','btn btn-danger');
 '''
-* /module/my/view/profile.html.php 增加了绑定钉钉按钮的1行代码,在代码echo html::a($this->createLink('my', 'editprofile'), $lang->user->editProfile, '', "class='btn btn-primary'");增加以下代码
+* /module/my/view/profile.html.php 增加了绑定钉钉按钮的1行代码,在代码'''echo html::a($this->createLink('my', 'editprofile'), $lang->user->editProfile, '', "class='btn btn-primary'");'''增加以下代码
 '''
 /* 钉钉绑定按钮 */ if($config->ding->ddturnon) echo html::linkButton($lang->user->dingBindBtn,"https://oapi.dingtalk.com/connect/qrconnect?appid=".$config->ding->appid."&response_type=code&scope=snsapi_login&state=".$this->loadModel('dingtalk')->updateSessionDing()."&redirect_uri=".urlencode($config->ding->redirect.$this->createLink('dingtalk','login')),'window','','btn-danger');
 '''
-* /module/my/view/changepassword.html.php 增加了提示初始密码为123456的1行代码,把代码echo html::password('originalPassword', '', "class='form-control'");代码替换成如下代码
+* /module/my/view/changepassword.html.php 增加了提示初始密码为123456的1行代码,把代码'''echo html::password('originalPassword', '', "class='form-control'");'''代码替换成如下代码
 '''
 /* 钉钉绑定按钮 */ echo html::password('originalPassword', '', "class='form-control' placeholder='初始密码 123456'");
 '''
@@ -68,7 +68,7 @@ $lang->dept->syncding = '同步钉钉部门';
 $lang->dept->syncding = '同步釘釘部門';
 $lang->dept->syncding = 'Synchronous Dingding Department';
 '''
-* /module/company/view/browse.html.php 把维护部门换成同步钉钉同步部门,把代码common::printLink('dept', 'browse', '', $lang->dept->manage, '', "class='btn btn-info btn-wide'");替换成以下代码
+* /module/company/view/browse.html.php 把维护部门换成同步钉钉同步部门,把代码'''common::printLink('dept', 'browse', '', $lang->dept->manage, '', "class='btn btn-info btn-wide'");'''替换成以下代码
 '''
 /* 同步钉钉部门 */ common::printLink('dingtalk', 'syncdept', '', $lang->dept->syncding, '', "class='btn btn-info btn-wide'");
 '''
