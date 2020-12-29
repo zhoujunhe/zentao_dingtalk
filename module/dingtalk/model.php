@@ -84,10 +84,29 @@ class dingtalkModel extends model
             $res = json_decode($result,true);
             if($res['errcode']!=0) return ['errcode'=>$res['errcode'],'errmsg'=>$res['errmsg']];
             $token = $res['access_token'];
-            $this->caches('ding_token',$token,3600);
+            $this->caches('ding_token',$token,7200);
         }
         return $token;
     }
+
+    /*
+     * 获取内部应用钉钉授权码
+     * @return array
+     * */
+    public function getInterToken(){
+        $token = $this->caches('inter_token');
+        if(empty($token)){
+            $result = $this->curl('https://oapi.dingtalk.com/gettoken?appkey='.$this->config->ding->inter_appkey.'&appsecret='.$this->config->ding->inter_appsecret,[],'GET');
+            $res = json_decode($result,true);
+            if($res['errcode']!=0) return ['errcode'=>$res['errcode'],'errmsg'=>$res['errmsg']];
+            $token = $res['access_token'];
+            $this->caches('inter_token',$token,$res['expires_in']);
+        }
+        return $token;
+    }
+
+
+
 
     /*
      * 获取钉钉用户唯一标识和持久码
@@ -144,27 +163,116 @@ class dingtalkModel extends model
      * @param $unionid 用户的唯一ID
      * */
     public function getDingtalkCompanyUserid($unionid){
-        $token = $this->getDingtalkToken();
+        $token = $this->getInterToken();
         if(empty($sns)) ['errcode'=>500,'errmsg'=>'缺少用户授权码sns'];
         $result = $this->curl('https://oapi.dingtalk.com/user/getUseridByUnionid?access_token='.$token.'&unionid='.$unionid,[],'GET');
         $res = json_decode($result,true);
         if($res['errcode']!=0) return ['errcode'=>$res['errcode'],'errmsg'=>$res['errmsg']];
         return $res;
-
     }
 
     /*
+     * 根据部门id获取部门详细信息
+     * @param $id 部门ID
+     * */
+    public function getDingtalkdepartment($id){
+        $token = $this->getInterToken();
+        if(empty($sns)) ['errcode'=>500,'errmsg'=>'缺少用户授权码sns'];
+        $result = $this->curl('https://oapi.dingtalk.com/department/get?access_token='.$token.'&id='.$id,[],'GET');
+        $res = json_decode($result,true);
+        if($res['errcode']!=0) return ['errcode'=>$res['errcode'],'errmsg'=>$res['errmsg']];
+        return $res;
+    }
+
+
+    /*
+     * 查询部门的所有上级父部门路径
+     * @param $id 部门ID
+     * */
+    public function list_parent_depts_by_dept($id){
+        $token = $this->getInterToken();
+        if(empty($sns)) ['errcode'=>500,'errmsg'=>'缺少用户授权码sns'];
+        $result = $this->curl('https://oapi.dingtalk.com/department/list_parent_depts_by_dept?access_token='.$token.'&id='.$id,[],'GET');
+        $res = json_decode($result,true);
+        if($res['errcode']!=0) return ['errcode'=>$res['errcode'],'errmsg'=>$res['errmsg']];
+        return $res;
+    }
+
+
+
+    /*
+     * 同步钉钉的部门数据，以钉钉组织结构为基准，以部门id为比较条件
+     * */
+    public function syncDept(){
+        $token = $this->getInterToken();
+        if(empty($sns)) ['errcode'=>500,'errmsg'=>'缺少用户授权码sns'];
+        $result = $this->curl('https://oapi.dingtalk.com/department/list?access_token='.$token.'&id=1',[],'GET');
+        $res = json_decode($result,true);
+        if($res['errcode']!=0) return ['errcode'=>$res['errcode'],'errmsg'=>$res['errmsg']];
+        $depts = $res["department"];
+
+        foreach ($depts as $value){
+            $id = $value['id'];
+            
+            $ddept = new stdclass();
+            $ddept->id = $id;
+            $ddept->name = $value['name'];
+            $ddept->parent = ($value['parentid']==1)?0:$value['parentid'];   //一级部门上级为0
+            //一级部门
+            if ($ddept->parent ==0 )
+            {
+                $ddept->grade = 1;
+                $ddept->path = ','.$ddept->id.',';
+            }
+            else {
+                //找到上级父部门路径
+                $pre = $this->list_parent_depts_by_dept($id);
+                $parents = $pre["parentIds"];
+                $ddept->grade = count($parents)-1;
+                $str = ',';
+                for($i=count($parents)-2;$i>=0;$i--)
+                {
+                    $str = $str.$parents[$i].',';
+                }
+                $ddept->path = $str;
+            }
+            
+            //查找数据库中是否存在这个部门，以id为基准
+            $deptrecord = $this->dao->select('*')->from(TABLE_DEPT)
+            ->where('id')->eq($id)
+            ->limit('0,1')
+            ->fetch();
+            //存在部门，更新部门
+            if($deptrecord){
+                $rows = $this->dao->update(TABLE_DEPT)
+                    ->data($ddept)
+                    ->where('id')->eq($id)
+                    ->limit('1')
+                    ->exec();
+            }else {
+                #不存在创建部门
+                $this->dao->insert(TABLE_DEPT)->data($ddept)->exec();
+            }
+        }
+        return true;
+    }
+
+
+
+    /*
      * 根据钉钉企业用户userid获取用户详情
-     * @param $unionid 用户的唯一ID
+     * @param $userid 用户的唯一ID
      * */
     public function getDingtalkCompanyUserInfo($userid){
-        $token = $this->getDingtalkToken();
+        $token = $this->getInterToken();
         if(empty($sns)) ['errcode'=>500,'errmsg'=>'缺少用户授权码sns'];
         $result = $this->curl('https://oapi.dingtalk.com/user/get?access_token='.$token.'&userid='.$userid,[],'GET');
         $res = json_decode($result,true);
         if($res['errcode']!=0) return ['errcode'=>$res['errcode'],'errmsg'=>$res['errmsg']];
         return $res;
     }
+
+
 
     /*
      * 错误跳转页
@@ -185,8 +293,10 @@ class dingtalkModel extends model
         $duser->dt_unionid = $data['dt_unionid'];
         $duser->dt_dingid = $data['dt_dingId'];
         $duser->dt_nick = $data['dt_nick'];
-        $duser->realname = $data['dt_nick'];
-        $duser->nickname = $data['dt_nick'];
+        $duser->realname = $data['name'];
+        $duser->nickname = $data['name'];
+        $duser->email = $data['email'];
+        $duser->mobile = $data['mobile'];
         $rows = $this->dao->update(TABLE_USER)
             ->data($duser)
             ->where('account')->eq($account)
@@ -199,22 +309,31 @@ class dingtalkModel extends model
      * 插入钉钉用户数据和用户组关系
      * */
     public function regDingtalkUser($data){
+
+        /* 获取部门详细 */
+        $deptrecord = $this->dao->select('*')->from(TABLE_DEPT)
+            ->where('id')->eq($data['dept'])
+            ->limit('0,1')
+            ->fetch();
+        //部门不存在返回失败
+        if(!$deptrecord) $this->syncDept();
+
         $duser = new stdclass();
         $duser->dt_openid = $data['dt_openid'];
         $duser->dt_persistent_code = $data['dt_persistent_code'];
         $duser->dt_unionid = $data['dt_unionid'];
         $duser->dt_dingid = $data['dt_dingId'];
         $duser->dt_nick = $data['dt_nick'];
-        $duser->realname = $data['dt_nick'];
-        $duser->nickname = $data['dt_nick'];
-        $duser->account  = $this->pinyin($data['dt_nick'],'all','','');
+        $duser->realname = $data['name'];
+        $duser->nickname = $data['name'];
+        $duser->email = $data['email'];
+        $duser->mobile = $data['mobile'];
+        // $duser->account  = $this->pinyin($data['dt_nick'],'all','','');
+        $duser->account  = substr($data['email'],0,strpos($data['email'],'@'));
         $duser->role = 'others';
-        $duser->dept = 0;
+        $duser->dept = $data['dept'];
         $duser->password = md5('123456');
         $duser->gender   = 'm';
-        $dusergroup = new stdclass();
-        $dusergroup->account = $duser->account;
-        $dusergroup->group = 10;
 		/* 检查账号是否有重名 */
         $record = $this->dao->select('*')->from(TABLE_USER)
             ->where('account')->eq($duser->account)
@@ -222,8 +341,11 @@ class dingtalkModel extends model
             ->fetch();
 		/* 如果有重名则在账号名后面加2位 */
 		if($record){
-			$duser->account  = $this->pinyin($data['dt_nick'],'all','','').substr($data['dt_nick'],-1,1).rand(0,9);
-		}
+			$duser->account  = $this->pinyin($data['name'],'all','','').rand(0,99);
+        }
+        $dusergroup = new stdclass();
+        $dusergroup->account = $duser->account;
+        $dusergroup->group = 10;
         $this->dao->insert(TABLE_USERGROUP)->data($dusergroup)->exec();
         return $this->dao->insert(TABLE_USER)->data($duser)->exec();
     }
@@ -283,7 +405,10 @@ class dingtalkModel extends model
         }
         return $user;
     }
-	
+    
+
+
+
 	/*
 	 * 汉字转拼音方法
 	 * $str 要转换的字符串

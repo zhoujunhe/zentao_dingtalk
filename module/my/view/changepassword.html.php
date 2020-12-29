@@ -23,7 +23,7 @@
       </tr>  
       <tr>
         <th><?php echo $lang->user->originalPassword;?></th>
-        <td><?php echo html::password('originalPassword', '', "class='form-control' placeholder='初始密码 123456'");?></td>
+        <td><?php /* 钉钉绑定按钮 */ echo html::password('originalPassword', '', "class='form-control' placeholder='初始密码 123456'");?></td>
       </tr>  
       <tr>
         <th><?php echo $lang->user->password;?></th>

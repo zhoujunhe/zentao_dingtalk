@@ -5,38 +5,52 @@ class dingtalk extends control
 
     /* 钉钉登录 */
     public function login(){
-
+	
         if(isset($_GET['code']) and isset($_GET['state'])){
             if($this->get->state)   $state  = $this->get->state;
             if($this->get->code)   $code  = $this->get->code;
-
             if(empty($code)) $this->dingtalk->errjump('/www/user-login.html','用户临时码code不能为空');
             if(empty($state)) $this->dingtalk->errjump('/www/user-login.html','状态参数state不能为空');
-
             $statesess = $this->session->ding_rand;
             if($statesess != $state) $this->dingtalk->errjump('/www/user-login.html','状态参数state过期');
-
             $usercode = $this->dingtalk->getDingtalkUserToken($code); /* 获取用户的持久授权码 */
             if($usercode['errcode']!=0) $this->dingtalk->errjump('/www/user-login.html',$usercode['errmsg']);
             $this->dingtalk->updateSessionDing(true); /* 销毁session的钉钉ding_state */
 
+            /* 获取钉钉用户信息 */
+            $usersns = $this->dingtalk->getDingtalkUserSNS($usercode['openid'],$usercode['persistent_code']); /* 获取用户的SNS授权码 */
+            if($usersns['errcode']!=0) $this->dingtalk->errjump('/www/user-login.html',$usersns['errmsg']);
+
+            $userinfo = $this->dingtalk->getDingtalkUserInfo($usersns['sns_token']); /* 获取用户的基本信息 */
+            if($userinfo['errcode']!=0) $this->dingtalk->errjump('/www/user-login.html',$userinfo['errmsg']);
+
+            $userid = $this->dingtalk->getDingtalkCompanyUserid($userinfo['user_info']['unionid']);    /* 根据unionid获取钉钉企业用户userid */
+            if ($userid['errcode']==0 and $userid["contactType"]==1)
+            {
+                $this->dingtalk->errjump('/www/user-login.html','你是团队外部联系人，不能进入系统。');
+            }
+            elseif ($userid['errcode']==60121)
+            {
+                $this->dingtalk->errjump('/www/user-login.html','你不是团队成员，不能进入系统。');
+            }
+            if($userid['errcode']!=0) $this->dingtalk->errjump('/www/user-login.html',$userid['errmsg']);
+
             /* 用户是否已登录,如果已登录,则直接进行绑定 */
             if($this->session->user !== false){
-
-                /* 获取钉钉用户信息 */
-                $usersns = $this->dingtalk->getDingtalkUserSNS($usercode['openid'],$usercode['persistent_code']); /* 获取用户的SNS授权码 */
-                if($usersns['errcode']!=0) $this->dingtalk->errjump('/www/user-login.html',$usersns['errmsg']);
-
-                $userinfo = $this->dingtalk->getDingtalkUserInfo($usersns['sns_token']); /* 获取用户的基本信息 */
-                if($userinfo['errcode']!=0) $this->dingtalk->errjump('/www/user-login.html',$userinfo['errmsg']);
-
+                
+                $companyuserinfo = $this->dingtalk->getDingtalkCompanyUserInfo($userid['userid']);    /* 根据钉钉企业用户userid获取用户详情 */
+                if($userid['errcode']!=0) $this->dingtalk->errjump('/www/user-login.html',$companyuserinfo['errmsg']);
+                
                 /* 构建钉钉信息数据 */
                 $data = [
                     'dt_openid'=>$usercode['openid'],
                     'dt_unionid'=>$usercode['unionid'],
                     'dt_persistent_code'=>$usercode['persistent_code'],
                     'dt_dingId'=>$userinfo['user_info']['dingId'],
-                    'dt_nick'=>$userinfo['user_info']['nick']
+                    'dt_nick'=>$userinfo['user_info']['nick'],
+                    'name'=> $companyuserinfo['name'],
+                    'email'=>$companyuserinfo['email'],
+                    'mobile'=>$companyuserinfo['mobile']
                 ];
 
                 /* 绑定钉钉用户 */
@@ -49,27 +63,26 @@ class dingtalk extends control
 
             /* 检查钉钉用户登录 */
             $user = $this->dingtalk->checkDingtalkUser($usercode['openid'],$usercode['persistent_code']);
-
             /* 若允许钉钉自动注册账号且钉钉用户不存在,则获取钉钉用户信息并注册 */
             if($user===false && $this->config->ding->logintype){
-                $usersns = $this->dingtalk->getDingtalkUserSNS($usercode['openid'],$usercode['persistent_code']); /* 获取用户的SNS授权码 */
-                if($usersns['errcode']!=0) $this->dingtalk->errjump('/www/user-login.html',$usersns['errmsg']);
 
-                $userinfo = $this->dingtalk->getDingtalkUserInfo($usersns['sns_token']); /* 获取用户的基本信息 */
-                if($userinfo['errcode']!=0) $this->dingtalk->errjump('/www/user-login.html',$userinfo['errmsg']);
-
+                $companyuserinfo = $this->dingtalk->getDingtalkCompanyUserInfo($userid['userid']);    /* 根据钉钉企业用户userid获取用户详情 */
+                if($userid['errcode']!=0) $this->dingtalk->errjump('/www/user-login.html',$companyuserinfo['errmsg']);
+                
                 /* 构建钉钉信息数据 */
                 $data = [
                     'dt_openid'=>$usercode['openid'],
                     'dt_unionid'=>$usercode['unionid'],
                     'dt_persistent_code'=>$usercode['persistent_code'],
                     'dt_dingId'=>$userinfo['user_info']['dingId'],
-                    'dt_nick'=>$userinfo['user_info']['nick']
+                    'dt_nick'=>$userinfo['user_info']['nick'],
+                    'name'=> $companyuserinfo['name'],
+                    'email'=>$companyuserinfo['email'],
+                    'mobile'=>$companyuserinfo['mobile'],
+                    'dept'=>$companyuserinfo['department'][0]
                 ];
-
                 /* 用户注册 */
-                $this->dingtalk->regDingtalkUser($data);
-
+                if ($this->dingtalk->regDingtalkUser($data)==false) $this->dingtalk->errjump('/www/user-login.html','请先在禅道创建部门：'.$department['name']);
                 /* 重新获取钉钉用户信息 */
                 $user = $this->dingtalk->checkDingtalkUser($usercode['openid'],$usercode['persistent_code']);
 
@@ -99,6 +112,12 @@ class dingtalk extends control
             $this->dingtalk->errjump('/www/user-login.html','缺少钉钉参数');
         }
 
+    }
+
+    //以钉钉为准同步组织结构
+    public function syncdept(){
+        $this->dingtalk->syncDept();
+        header("Location: company-browse.html");
     }
 
 }

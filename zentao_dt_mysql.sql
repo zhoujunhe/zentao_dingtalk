@@ -8,3 +8,6 @@ ADD INDEX `dt_openid` (`dt_openid`) USING BTREE ,
 ADD INDEX `dt_unionid` (`dt_unionid`) USING BTREE ,
 ADD INDEX `dt_persistent_code` (`dt_persistent_code`) USING BTREE ,
 ADD INDEX `dt_dingid` (`dt_dingid`) USING BTREE ;
+
+alter table zt_dept CHANGE  `id` `id` int ,  CHANGE `parent` `parent` int, ALGORITHM=COPY;
+alter table zt_user CHANGE  `dept` `dept` int,ALGORITHM=COPY;
