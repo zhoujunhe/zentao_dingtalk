@@ -11,9 +11,79 @@
 include '../../common/view/header.lite.html.php';
 if(empty($config->notMd5Pwd))js::import($jsRoot . 'md5.js');
 ?>
+<script src="https://g.alicdn.com/dingding/dinglogin/0.0.5/ddLogin.js"></script>
+<script>
+window.onload = function(){
+<?php
+echo "var appid='".$config->ding->appid."';";
+echo "var state='".$this->loadModel('dingtalk')->updateSessionDing()."';";
+echo "var redirect_uri='".$config->ding->redirect.$this->createLink('dingtalk','login')."';";
+?>
+  /*
+  * 解释一下goto参数，参考以下例子：
+  * var url = encodeURIComponent('http://localhost.me/index.php?test=1&aa=2');
+  * var goto = encodeURIComponent('https://oapi.dingtalk.com/connect/oauth2/sns_authorize?appid=appid&response_type=code&scope=snsapi_login&state=STATE&redirect_uri='+url)
+  */
+  var url = encodeURIComponent(redirect_uri);
+  var goto_url = 'https://oapi.dingtalk.com/connect/oauth2/sns_authorize?appid='+appid+'&response_type=code&scope=snsapi_login&state='+state+'&redirect_uri='+url;
+  var goto = encodeURIComponent(goto_url)
+  var obj = DDLogin({
+      id:"login_scan",//这里需要你在自己的页面定义一个HTML标签并设置id，例如<div id="login_container"></div>或<span id="login_container"></span>
+      goto: goto, //请参考注释里的方式
+      style: "border:none;background-color:#FFFFFF;",
+      width : "560",
+      height: "300"
+  });
+
+  var handleMessage = function (event) {
+  var origin = event.origin;
+  console.log("origin", event.origin);
+  if( origin == "https://login.dingtalk.com" ) { //判断是否来自ddLogin扫码事件。
+    var loginTmpCode = event.data; 
+    //获取到loginTmpCode后就可以在这里构造跳转链接进行跳转了
+    window.location.replace(goto_url+'&loginTmpCode='+loginTmpCode);
+    console.log("url", goto_url+'&loginTmpCode='+loginTmpCode);
+    }
+  };
+  if (typeof window.addEventListener != 'undefined') {
+      window.addEventListener('message', handleMessage, false);
+  } else if (typeof window.attachEvent != 'undefined') {
+      window.attachEvent('onmessage', handleMessage);
+  }
+}
+function scan_onclick(val){
+  login_scan.hidden=!val;
+  loginPanel.hidden=val;
+  document.getElementById('label_scan').className = val?"select":"unselect";
+  document.getElementById('lable_pwd').className = val?"unselect":"select";
+}
+</script>
+<style>
+  .unselect{
+            cursor: pointer;
+            text-align: center;
+            background: #FFFFFF;
+            border-bottom:3px solid #FFFFFF;
+            height:40px;
+  }
+  .select{
+            cursor: pointer;
+            text-align: center;
+            background: #FFFFFF;
+            border-bottom:3px solid #ff6a00;
+            height:40px;
+  }
+</style>
 <main id="main" class="fade no-padding">
   <div class="container" id="login">
-    <div id="loginPanel">
+    <table width="560px">
+      <row>
+        <td id="lable_pwd" onclick="scan_onclick(false);" class="select">账号密码登录</td>
+        <td id="label_scan" onclick="scan_onclick(true);" class="unselect" style="border-left:1px solid #b3d4fc;">钉钉扫码登录</td>
+      </row>
+    </table>
+    <div id="login_scan" hidden="true" style="border:none;background-color:#FFFFFF;height:305px;width:560px;"></div>
+    <div id="loginPanel" style="border:none;background-color:#FFFFFF;height:305px;width:560px;border-radius: 0px;">
       <header>
         <h2><?php printf($lang->welcome, $app->company->name);?></h2>
         <div class="actions dropdown dropdown-hover" id='langs'>
@@ -50,7 +120,6 @@ if(empty($config->notMd5Pwd))js::import($jsRoot . 'md5.js');
                   <td class="form-actions">
                   <?php
                   echo html::submitButton($lang->login, '', 'btn btn-primary');
-                  /* 钉钉登录按钮 */ if($config->ding->ddturnon) echo html::linkButton($lang->user->dingBtn,"https://oapi.dingtalk.com/connect/qrconnect?appid=".$config->ding->appid."&response_type=code&scope=snsapi_login&state=".$this->loadModel('dingtalk')->updateSessionDing()."&redirect_uri=".urlencode($config->ding->redirect.$this->createLink('dingtalk','login')),'window','','btn btn-danger');
                   if($app->company->guest) echo html::linkButton($lang->user->asGuest, $this->createLink($config->default->module));
                   echo html::hidden('referer', $referer);
                   echo html::hidden('verifyRand', $rand);
