@@ -45,7 +45,7 @@ $config->ding->inter_appsecret = '';/* 钉钉H5微应用AppSecret */
 ```
 
 #### 四、文件更改：
-复制文件之前推荐先备份目录下所有文件，如果复制过去不能使用，安以下方法更更源代码
+禅道版本不一至，可以按以下方法修改源码，但修改源码前请先备份目录下所有文件，修改源码方法如下
 
 * /module/user/view/login.html.php 先找到以下三行代码
 ```
@@ -166,13 +166,13 @@ $lang->dept->syncding = 'Synchronous Dingding Department';
 /* 同步钉钉部门 */ common::printLink('dingtalk', 'syncdept', '', $lang->dept->syncding, '', "class='btn btn-info btn-wide'");
 ```
 
+### 效果图如下
 
-###效果图如下
-####账号密码登录
+#### 账号密码登录
 ![image](img/lonig1.png)
-####钉钉扫码登录
+#### 钉钉扫码登录
 ![image](img/lonig2.png)
-####同步组织结构
+#### 同步组织结构
 ![image](img/dept.png)
-####绑定钉钉扫码登录
+#### 绑定钉钉扫码登录
 ![image](img/bind.png)
