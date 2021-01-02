@@ -31,4 +31,4 @@ $lang->dept->error = new stdclass();
 $lang->dept->error->hasSons  = '该部门有子部门，不能删除！';
 $lang->dept->error->hasUsers = '该部门有职员，不能删除！';
 
-$lang->dept->syncding = '同步钉钉组织结构';
+$lang->dept->syncding = '同步钉钉部门';
