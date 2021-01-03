@@ -25,7 +25,7 @@
 * 将所有文件复制到禅道的安装目录下,假如禅道的安装目录为```/opt/zentaopms```，使用命令如下：
 ```
 cd zentao_dingtalk 
-cp -R * /optzentaopms
+cp -R * /opt/zentaopms
 ```
 
 #### 三、配置增加：
