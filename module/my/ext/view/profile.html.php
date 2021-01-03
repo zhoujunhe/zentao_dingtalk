@@ -9,15 +9,16 @@
  * @version     $Id: profile.html.php 4694 2013-05-02 01:40:54Z chencongzhi520@gmail.com $
  * @link        http://www.zentao.net
  */
+$lang->user->dingBindBtn
 ?>
-<?php include '../../common/view/header.html.php';?>
+<?php include '../../../common/view/header.html.php';?>
 <div id='mainContent' class='main-row'>
   <div class='main-col col-6'>
     <div class='cell'>
       <div class='main-header'>
         <h2><?php echo $lang->user->legendBasic;?></h2>
         <div class='actions pull-right'>
-          <?php /* 钉钉绑定按钮 */ if($config->ding->ddturnon) echo html::linkButton($lang->user->dingBindBtn,"https://oapi.dingtalk.com/connect/qrconnect?appid=".$config->ding->appid."&response_type=code&scope=snsapi_login&state=".$this->loadModel('dingtalk')->updateSessionDing()."&redirect_uri=".urlencode($config->ding->redirect.$this->createLink('dingtalk','login')),'window','','btn-danger');
+          <?php /* 钉钉绑定按钮 */ if($config->ding->ddturnon) echo html::linkButton($lang->my->dingBindBtn,"https://oapi.dingtalk.com/connect/qrconnect?appid=".$config->ding->appid."&response_type=code&scope=snsapi_login&state=".$this->loadModel('dingtalk')->updateSessionDing()."&redirect_uri=".urlencode($config->ding->redirect.$this->createLink('dingtalk','login')),'window','','btn-danger');
           echo html::a($this->createLink('my', 'editprofile'), $lang->user->editProfile, '', "class='btn btn-primary'");?>
         </div>
       </div>
@@ -121,4 +122,4 @@
     </div>
   </div>
 </div>
-<?php include '../../common/view/footer.html.php';?>
+<?php include '../../../common/view/footer.html.php';?>

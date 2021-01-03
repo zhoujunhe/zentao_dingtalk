@@ -10,7 +10,7 @@
  * @link        http://www.zentao.net
  */
 ?>
-<?php include '../../common/view/header.html.php';?>
+<?php include '../../../common/view/header.html.php';?>
 <div class='container mw-500px'>
   <div id='titlebar'>
     <div class='heading'><i class='icon-key'></i> <?php echo $lang->my->changePassword;?></div>
@@ -61,4 +61,4 @@ function checkPassword(password)
     $('#passwordStrength').css('display', password == '' ? 'none' : 'table-cell');
 }
 </script>
-<?php include '../../common/view/footer.html.php';?>
+<?php include '../../../common/view/footer.html.php';?>
