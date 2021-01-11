@@ -306,6 +306,19 @@ class dingtalkModel extends model
     }
 
     /*
+     *生成随机密码 ,pw_length 密码长度
+     */
+    function create_password($pw_length = 8)
+    {
+        $randpwd = '';
+        for ($i = 0; $i < $pw_length; $i++) 
+        {
+            $randpwd .= chr(mt_rand(33, 126));
+        }
+        return $randpwd;
+    }    
+
+    /*
      * 插入钉钉用户数据和用户组关系
      * */
     public function regDingtalkUser($data){
@@ -332,7 +345,7 @@ class dingtalkModel extends model
         $duser->account  = substr($data['email'],0,strpos($data['email'],'@'));
         $duser->role = 'others';
         $duser->dept = $data['dept'];
-        $duser->password = md5('123456');
+        $duser->password = md5($this->create_password(12)); //随机生成12位密码长度
         $duser->gender   = 'm';
 		/* 检查账号是否有重名 */
         $record = $this->dao->select('*')->from(TABLE_USER)
@@ -393,7 +406,7 @@ class dingtalkModel extends model
             if($user->modifyPassword) $user->modifyPasswordReason = 'modifyPasswordFirstLogin';
             if(!$user->modifyPassword and !empty($this->config->safe->changeWeak))
             {
-                $user->modifyPassword = $this->loadModel('admin')->checkWeak($user);
+                #$user->modifyPassword = $this->loadModel('admin')->checkWeak($user);   //第一次弹出密码登录界面
                 if($user->modifyPassword) $user->modifyPasswordReason = 'weak';
             }
 
