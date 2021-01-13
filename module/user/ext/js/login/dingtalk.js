@@ -9,7 +9,7 @@ function dingtalk(){
   var obj = DDLogin({
       id:"login_scan",//这里需要你在自己的页面定义一个HTML标签并设置id，例如<div id="login_container"></div>或<span id="login_container"></span>
       goto: goto, //请参考注释里的方式
-      style: "border:none;background-color:#FFFFFF;",
+      style: "border:none;background-color:#F8F8F8;",
       width : "560",
       height: "300"
   });
